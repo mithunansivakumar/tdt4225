@@ -16,6 +16,13 @@ class Task1:
         lines = f.read().splitlines()
         f.close()
         return lines
+    
+    def get_user_ids(self):
+        user_ids = os.walk("data/dataset/Data")
+        for i in user_ids:
+            user_ids = i[1]
+            break
+        return user_ids
 
 
     def create_user_table(self, table_name):
@@ -31,11 +38,7 @@ class Task1:
     
     def insert_user_data(self, table_name):
         labels = self.get_labels()
-        print(labels)
-        user_ids = os.walk("data/dataset/Data")
-        for i in user_ids:
-            user_ids = i[1]
-            break
+        user_ids = self.get_user_ids()
 
         query = """INSERT INTO %s (id, has_labels) VALUES (%s, %s)"""
 
@@ -44,9 +47,6 @@ class Task1:
             self.cursor.execute(query % (table_name, i, has_labels))
 
         self.db_connection.commit()
-
-        
-
 
         logging.info("inserted user data")
 
@@ -63,6 +63,11 @@ class Task1:
         # This adds table_name to the %s variable and executes the query
         self.cursor.execute(query % table_name)
         self.db_connection.commit()
+    
+    def insert_acitivty_data(self, table_name):
+        print("Se test.py for WIP av denne metoden")
+
+
 
     def create_trackpoint_table(self, table_name):
         query = """CREATE TABLE IF NOT EXISTS %s (
