@@ -25,7 +25,7 @@ for user in dirs:
 
     if labels_exists:
         f = open(labels_path)
-        lines = f.readlines()[1:]
+        lines = [line for line in f.readlines()[1:] if line.strip()]
         f.close()
 
         for line in lines:
@@ -40,7 +40,7 @@ for user in dirs:
         activity_id = 0
         activity_path = os.path.join(trajectories_path, activity)
         f = open(activity_path)
-        lines = f.readlines()[6:] # The first 6 lines are the header
+        lines = [line for line in f.readlines()[6:] if line.strip()] # The first 6 lines are the header
         number_of_lines = len(lines)
         f.close()
 
@@ -68,7 +68,8 @@ for user in dirs:
         #activity_id = self.cursor.lastrowid
 
         for line in lines:
-            print(line)
+            point = line.strip().split(",")
+            print(point)
             break 
 
 
