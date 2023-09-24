@@ -65,7 +65,7 @@ class Task1:
         self.cursor.execute(query % table_name)
         self.db_connection.commit()
     
-    def insert_acitivty_data(self):
+    def insert_acitivty_data(self, activity_table_name, trackpoint_table_name):
         path = "data/dataset/Data"
         dirs =  os.listdir(path)
         dirs = ["129"]
@@ -169,7 +169,7 @@ def main():
         program.show_tables()
 
         program.insert_user_data("User")
-        program.insert_acitivty_data()
+        program.insert_acitivty_data("Acitivity", "TrackPoint")
 
     except Exception as e:
         print("ERROR: Failed to use database:", e)
