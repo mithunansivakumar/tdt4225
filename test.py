@@ -1,12 +1,6 @@
 import os
 from datetime import datetime
 
-####
-f = open("data/dataset/labeled_ids.txt")
-lines = f.read().splitlines()
-f.close()
-###
-
 path = "data/dataset/Data"
 dirs =  os.listdir(path)
 dirs = ["129"]
@@ -63,19 +57,21 @@ for user in dirs:
                 if last_date_time == vals[0]:
                     activity_mode = vals[1]
         
-        #query = """INSERT INTO %s (id, user_id, transportation_mode, start_date_time, end_date_time) VALUES (%d, %s, %s, %s, %s)"""
+        #query = """INSERT INTO Activity (id, user_id, transportation_mode, start_date_time, end_date_time) VALUES (%d, %s, %s, %s, %s)"""
         #self.cursor.execute(query % (table_name, transport_mode, first_date_time, last_date_time))
         #activity_id = self.cursor.lastrowid
 
+        query = """INSERT INTO TrackPoint (activity_id, lat, lon, altitude, date_days, date_time) VALUES (%d, %d, %d, %d, %d, %s)"""
+
         for line in lines:
             point = line.strip().split(",")
-            print(point)
-            break 
+            lat = point[0]
+            lon = point[1]
+            altitude = point[3]
+            date_days = point[4]
+            date_time = datetime.strptime(f'{point[5]} {point[6]}', activity_datetime_format)
 
-
-
-
-
+            #self.cursor.execute(query % (activity_id, lat, lon, altitude, date_days, date_time ))
 
         break
 
