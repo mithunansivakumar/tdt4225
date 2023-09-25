@@ -7,10 +7,19 @@ from datetime import datetime
 class Task1:
 
     def __init__(self):
-        print("hei")
         self.connection = DbConnector()
         self.db_connection = self.connection.db_connection
-        self.cursor = self.connection.cursor        
+        self.cursor = self.connection.cursor
+
+
+    def reset(self):
+        query = "DROP TABLE User;"
+        self.cursor.execute(query)       
+        query = "DROP TABLE Activity;"
+        self.cursor.execute(query)        
+        query = "DROP TABLE TrackPoint;"
+        self.cursor.execute(query)
+        self.db_connection.commit()         
 
     def get_labels(self):
         f = open("data/dataset/labeled_ids.txt")
@@ -27,13 +36,15 @@ class Task1:
 
 
     def create_user_table(self, table_name):
+        print("before query")
         query = """CREATE TABLE IF NOT EXISTS %s (
-                   id VARCHAR(30),
+                   id VARCHAR(30) NOT NULL PRIMARY KEY,
                    has_labels BOOLEAN)
                 """
         # This adds table_name to the %s variable and executes the query
         self.cursor.execute(query % table_name)
         self.db_connection.commit()
+        print("after query")
         logging.info("created user table")
 
     
@@ -57,8 +68,8 @@ class Task1:
                    user_id VARCHAR(30),
                    transportation_mode VARCHAR(30),
                    start_date_time DATETIME,
-                   end_date_time DATETIME
-                   FOREIGN KEY KEY(user_id) REFERENCES User(id) ON DELETE CASCADE
+                   end_date_time DATETIME,
+                   FOREIGN KEY (user_id) REFERENCES User(id) ON DELETE CASCADE
                    )
                 """
         # This adds table_name to the %s variable and executes the query
@@ -109,10 +120,12 @@ class Task1:
                 # TODO fix DRY?
                 first_date_time = lines[0].split(",")[-2:]
                 first_date_time[1] = first_date_time[1].strip() 
+                first_date_time_db = f'{first_date_time[0]} {first_date_time[1]}'
                 first_date_time = datetime.strptime(f'{first_date_time[0]} {first_date_time[1]}', activity_datetime_format)
 
                 last_date_time = lines[-1].split(",")[-2:]
                 last_date_time[1] = last_date_time[1].strip()
+                last_date_time_db = f'{last_date_time[0]} {last_date_time[1]}'
                 last_date_time = datetime.strptime(f'{last_date_time[0]} {last_date_time[1]}', activity_datetime_format)
 
                 if labels_exists:
@@ -122,11 +135,21 @@ class Task1:
                         if last_date_time == vals[0]:
                             transport_mode = vals[1]
                 
-                query = """INSERT INTO Activity (id, user_id, transportation_mode, start_date_time, end_date_time) VALUES (%d, %s, %s, %s)"""
-                self.cursor.execute(query % (user, transport_mode, first_date_time, last_date_time))
+                print(first_date_time_db)
+                print(last_date_time_db)
+                activity_query = """INSERT INTO Activity (user_id, transportation_mode, start_date_time, end_date_time) VALUES (%s, %s, %s, %s)"""
+
+                print("beforr eexecute")
+                form = activity_query % (user, transport_mode, first_date_time_db, last_date_time_db)
+                print(form)
+
+                self.cursor.execute(activity_query % (user, transport_mode, first_date_time_db, last_date_time_db))
+                print("aftre eexecute")
                 activity_id = self.cursor.lastrowid
 
-                query = """INSERT INTO TrackPoint (activity_id, lat, lon, altitude, date_days, date_time) VALUES (%d, %d, %d, %d, %d, %s)"""
+                print("GIT")
+
+                trackpoint_query = """INSERT INTO TrackPoint (activity_id, lat, lon, altitude, date_days, date_time) VALUES (%d, %f, %f, %f, %f, %s)"""
 
                 for line in lines:
                     point = line.strip().split(",")
@@ -135,8 +158,10 @@ class Task1:
                     altitude = point[3]
                     date_days = point[4]
                     date_time = datetime.strptime(f'{point[5]} {point[6]}', activity_datetime_format)
+                    print(date_time)
+                    print(date_time)
 
-                    self.cursor.execute(query % (activity_id, lat, lon, altitude, date_days, date_time ))
+                    self.cursor.execute(trackpoint_query % (activity_id, lat, lon, altitude, date_days, date_time ))
 
         self.db_connection.commit()
 
@@ -151,7 +176,7 @@ class Task1:
                    altitude INT,
                    date_days DOUBLE,
                    date_time DATETIME,
-                   FOREIGN KEY KEY(activity_id) REFERENCES Activity(id) ON DELETE CASCADE
+                   FOREIGN KEY (activity_id) REFERENCES Activity(id) ON DELETE CASCADE
                    )
                 """
         # This adds table_name to the %s variable and executes the query
@@ -162,14 +187,18 @@ class Task1:
 def main():
     program = None
     try:
+        print("TASK starter")
         program = Task1()
         program.create_user_table("User")
+        print("Added user table")
         program.create_acitivity_table("Activity")
+        print("Added activity table")
         program.create_trackpoint_table("TrackPoint")
-        program.show_tables()
-
-        program.insert_user_data("User")
+        print("Added trackpoint table")
+        #program.insert_user_data("User")
+        print("inert user table")
         program.insert_acitivty_data("Acitivity", "TrackPoint")
+        print("insert activity table")
 
     except Exception as e:
         print("ERROR: Failed to use database:", e)
