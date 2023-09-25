@@ -135,32 +135,20 @@ class Task1:
                         if last_date_time == vals[0]:
                             transport_mode = vals[1]
                 
-                print(first_date_time_db)
-                print(last_date_time_db)
-                activity_query = """INSERT INTO Activity (user_id, transportation_mode, start_date_time, end_date_time) VALUES (%s, %s, %s, %s)"""
-
-                print("beforr eexecute")
-                form = activity_query % (user, transport_mode, first_date_ti24me_db, last_date_time_db)
-                print(form)
+                activity_query = """INSERT INTO Activity (user_id, transportation_mode, start_date_time, end_date_time) VALUES ('%s', '%s', '%s', '%s')"""
 
                 self.cursor.execute(activity_query % (user, transport_mode, first_date_time_db, last_date_time_db))
-                print("aftre eexecute")
                 activity_id = self.cursor.lastrowid
 
-                print("GIT")
-
-                trackpoint_query = """INSERT INTO TrackPoint (activity_id, lat, lon, altitude, date_days, date_time) VALUES (%d, %f, %f, %f, %f, %s)"""
+                trackpoint_query = """INSERT INTO TrackPoint (activity_id, lat, lon, altitude, date_days, date_time) VALUES (%d, %f, %f, %f, %f, '%s')"""
 
                 for line in lines:
                     point = line.strip().split(",")
-                    lat = point[0]
-                    lon = point[1]
-                    altitude = point[3]
-                    date_days = point[4]
+                    lat = float(point[0])
+                    lon = float(point[1])
+                    altitude = int((point[3]))
+                    date_days = float(point[4])
                     date_time = datetime.strptime(f'{point[5]} {point[6]}', activity_datetime_format)
-                    print(date_time)
-                    print(date_time)
-
                     self.cursor.execute(trackpoint_query % (activity_id, lat, lon, altitude, date_days, date_time ))
 
         self.db_connection.commit()
@@ -187,8 +175,11 @@ class Task1:
 def main():
     program = None
     try:
-        print("TASK starter")
+    
+        print("Task 1 ...")
         program = Task1()
+        print("Reset db")
+        program.reset()
         program.create_user_table("User")
         print("Added user table")
         program.create_acitivity_table("Activity")
