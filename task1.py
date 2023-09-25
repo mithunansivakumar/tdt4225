@@ -140,7 +140,7 @@ class Task1:
                 activity_query = """INSERT INTO Activity (user_id, transportation_mode, start_date_time, end_date_time) VALUES (%s, %s, %s, %s)"""
 
                 print("beforr eexecute")
-                form = activity_query % (user, transport_mode, first_date_time_db, last_date_time_db)
+                form = activity_query % (user, transport_mode, first_date_ti24me_db, last_date_time_db)
                 print(form)
 
                 self.cursor.execute(activity_query % (user, transport_mode, first_date_time_db, last_date_time_db))
