@@ -13,12 +13,15 @@ class Task1:
 
 
     def reset(self):
-        query = "DROP TABLE User;"
-        self.cursor.execute(query)       
-        query = "DROP TABLE Activity;"
-        self.cursor.execute(query)        
         query = "DROP TABLE TrackPoint;"
         self.cursor.execute(query)
+
+        query = "DROP TABLE Activity;"
+        self.cursor.execute(query)        
+    
+        query = "DROP TABLE User;"
+        self.cursor.execute(query)       
+      
         self.db_connection.commit()         
 
     def get_labels(self):
@@ -146,14 +149,12 @@ class Task1:
                     point = line.strip().split(",")
                     lat = float(point[0])
                     lon = float(point[1])
-                    altitude = int((point[3]))
+                    altitude = int(float(point[3])) #TODO Altitude in feet (-777 if not valid). Er dette noe vi må sette eller det lagt til?
                     date_days = float(point[4])
                     date_time = datetime.strptime(f'{point[5]} {point[6]}', activity_datetime_format)
                     self.cursor.execute(trackpoint_query % (activity_id, lat, lon, altitude, date_days, date_time ))
 
         self.db_connection.commit()
-
-                
 
     def create_trackpoint_table(self, table_name):
         query = """CREATE TABLE IF NOT EXISTS %s (
@@ -175,7 +176,6 @@ class Task1:
 def main():
     program = None
     try:
-    
         print("Task 1 ...")
         program = Task1()
         print("Reset db")
@@ -186,10 +186,10 @@ def main():
         print("Added activity table")
         program.create_trackpoint_table("TrackPoint")
         print("Added trackpoint table")
-        #program.insert_user_data("User")
+        program.insert_user_data("User")
         print("inert user table")
         program.insert_acitivty_data("Acitivity", "TrackPoint")
-        print("insert activity table")
+        print("insert activity and trackpoint table")
 
     except Exception as e:
         print("ERROR: Failed to use database:", e)
