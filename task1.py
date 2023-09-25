@@ -82,7 +82,7 @@ class Task1:
     def insert_acitivty_data(self, activity_table_name, trackpoint_table_name):
         path = "data/dataset/Data"
         dirs =  os.listdir(path)
-        dirs = ["129"]
+        dirs = ["129"] #TODO comment after testing
 
         labels_datetime_format = "%Y/%m/%d %H:%M:%S"
         activity_datetime_format = "%Y-%m-%d %H:%M:%S"
