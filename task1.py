@@ -3,6 +3,7 @@ from tabulate import tabulate
 import logging
 import os
 from datetime import datetime
+from tqdm import tqdm
 
 class Task1:
 
@@ -82,12 +83,17 @@ class Task1:
     def insert_acitivty_data(self, activity_table_name, trackpoint_table_name):
         path = "data/dataset/Data"
         dirs =  os.listdir(path)
-        dirs = ["129"] #TODO comment after testing
+        #dirs = ["129"] #TODO comment after testing
+        #print(dirs[0:5])
 
         labels_datetime_format = "%Y/%m/%d %H:%M:%S"
         activity_datetime_format = "%Y-%m-%d %H:%M:%S"
 
-        for user in dirs:
+        for user in tqdm(dirs):
+            user_id_formatted = user.lstrip('0')
+            if user_id_formatted == '':
+                user_id_formatted = '0'
+            print(user_id_formatted)
             trajectories_path = os.path.join(path, user, "Trajectory")
             trajectories = os.listdir(trajectories_path)
 
@@ -140,7 +146,7 @@ class Task1:
                 
                 activity_query = """INSERT INTO Activity (user_id, transportation_mode, start_date_time, end_date_time) VALUES ('%s', '%s', '%s', '%s')"""
 
-                self.cursor.execute(activity_query % (user, transport_mode, first_date_time_db, last_date_time_db))
+                self.cursor.execute(activity_query % (user_id_formatted, transport_mode, first_date_time_db, last_date_time_db))
                 activity_id = self.cursor.lastrowid
 
                 trackpoint_query = """INSERT INTO TrackPoint (activity_id, lat, lon, altitude, date_days, date_time) VALUES (%d, %f, %f, %f, %f, '%s')"""
