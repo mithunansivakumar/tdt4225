@@ -16,7 +16,7 @@ class DbConnector:
 
     def __init__(self,
                  HOST="tdt4225-12.idi.ntnu.no",
-                 DATABASE="assigment2_store_distribuerte",
+                 DATABASE="test_db",
                  USER="mithunan",
                  PASSWORD="password"):
         # Connect to the database

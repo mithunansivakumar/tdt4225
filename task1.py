@@ -13,13 +13,13 @@ class Task1:
 
 
     def reset(self):
-        query = "DROP TABLE TrackPoint;"
+        query = "DROP TABLE IF EXISTS TrackPoint;"
         self.cursor.execute(query)
 
-        query = "DROP TABLE Activity;"
+        query = "DROP TABLE IF EXISTS Activity;"
         self.cursor.execute(query)        
     
-        query = "DROP TABLE User;"
+        query = "DROP TABLE IF EXISTS User;"
         self.cursor.execute(query)       
       
         self.db_connection.commit()         
@@ -82,12 +82,16 @@ class Task1:
     def insert_acitivty_data(self, activity_table_name, trackpoint_table_name):
         path = "data/dataset/Data"
         dirs =  os.listdir(path)
-        dirs = ["129"] #TODO comment after testing
+        #dirs = ["129"] #TODO comment after testing
 
         labels_datetime_format = "%Y/%m/%d %H:%M:%S"
         activity_datetime_format = "%Y-%m-%d %H:%M:%S"
 
         for user in dirs:
+            user_id_formatted = user.lstrip('0')
+            if user_id_formatted == '':
+                user_id_formatted = '0'
+            print(user_id_formatted)
             trajectories_path = os.path.join(path, user, "Trajectory")
             trajectories = os.listdir(trajectories_path)
 
@@ -110,7 +114,6 @@ class Task1:
 
             for activity in trajectories:
                 transport_mode = "other"
-                activity_id = 0
                 activity_path = os.path.join(trajectories_path, activity)
                 f = open(activity_path)
                 lines = [line for line in f.readlines()[6:] if line.strip()] # The first 6 lines are the header
@@ -140,10 +143,11 @@ class Task1:
                 
                 activity_query = """INSERT INTO Activity (user_id, transportation_mode, start_date_time, end_date_time) VALUES ('%s', '%s', '%s', '%s')"""
 
-                self.cursor.execute(activity_query % (user, transport_mode, first_date_time_db, last_date_time_db))
+                self.cursor.execute(activity_query % (user_id_formatted, transport_mode, first_date_time_db, last_date_time_db))
                 activity_id = self.cursor.lastrowid
 
-                trackpoint_query = """INSERT INTO TrackPoint (activity_id, lat, lon, altitude, date_days, date_time) VALUES (%d, %f, %f, %f, %f, '%s')"""
+                trackpoint_query = """INSERT INTO TrackPoint (activity_id, lat, lon, altitude, date_days, date_time) VALUES (%s, %s, %s, %s, %s, %s)"""
+                trackpoints = []
 
                 for line in lines:
                     point = line.strip().split(",")
@@ -152,9 +156,15 @@ class Task1:
                     altitude = int(float(point[3])) #TODO Altitude in feet (-777 if not valid). Er dette noe vi må sette eller det lagt til?
                     date_days = float(point[4])
                     date_time = datetime.strptime(f'{point[5]} {point[6]}', activity_datetime_format)
-                    self.cursor.execute(trackpoint_query % (activity_id, lat, lon, altitude, date_days, date_time ))
 
-        self.db_connection.commit()
+                    trackpoint = (activity_id, lat, lon, altitude, date_days, date_time)
+                    trackpoints.append(trackpoint)
+
+                self.cursor.executemany(trackpoint_query, trackpoints)
+
+                trackpoints = []
+
+                self.db_connection.commit()
 
     def create_trackpoint_table(self, table_name):
         query = """CREATE TABLE IF NOT EXISTS %s (
