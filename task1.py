@@ -80,6 +80,22 @@ class Task1:
         self.cursor.execute(query % table_name)
         self.db_connection.commit()
     
+    def create_trackpoint_table(self, table_name):
+        query = """CREATE TABLE IF NOT EXISTS %s (
+                   id INT AUTO_INCREMENT NOT NULL PRIMARY KEY,
+                   activity_id INT NOT NULL,
+                   lat DOUBLE,
+                   lon DOUBLE,
+                   altitude INT,
+                   date_days DOUBLE,
+                   date_time DATETIME,
+                   FOREIGN KEY (activity_id) REFERENCES Activity(id) ON DELETE CASCADE
+                   )
+                """
+        # This adds table_name to the %s variable and executes the query
+        self.cursor.execute(query % table_name)
+        self.db_connection.commit()
+    
     def insert_acitivty_data(self, activity_table_name, trackpoint_table_name):
         path = "data/dataset/Data"
         dirs =  os.listdir(path)
@@ -88,11 +104,11 @@ class Task1:
         labels_datetime_format = "%Y/%m/%d %H:%M:%S"
         activity_datetime_format = "%Y-%m-%d %H:%M:%S"
 
-        for user in dirs:
+        for user in tqdm(dirs):
             user_id_formatted = user.lstrip('0')
             if user_id_formatted == '':
                 user_id_formatted = '0'
-            print(user_id_formatted)
+            #print(user_id_formatted)
             trajectories_path = os.path.join(path, user, "Trajectory")
             trajectories = os.listdir(trajectories_path)
 
@@ -166,23 +182,6 @@ class Task1:
                 trackpoints = []
 
                 self.db_connection.commit()
-
-    def create_trackpoint_table(self, table_name):
-        query = """CREATE TABLE IF NOT EXISTS %s (
-                   id INT AUTO_INCREMENT NOT NULL PRIMARY KEY,
-                   activity_id INT NOT NULL,
-                   lat DOUBLE,
-                   lon DOUBLE,
-                   altitude INT,
-                   date_days DOUBLE,
-                   date_time DATETIME,
-                   FOREIGN KEY (activity_id) REFERENCES Activity(id) ON DELETE CASCADE
-                   )
-                """
-        # This adds table_name to the %s variable and executes the query
-        self.cursor.execute(query % table_name)
-        self.db_connection.commit()
-
 
 def main():
     program = None
