@@ -154,9 +154,11 @@ class Task1:
                 if labels_exists:
                     is_key_present = first_date_time in labels
                     if is_key_present:
-                        vals = labels[first_date_time]
+                        vals = labels[first_date_time] #(end_time, tranposrt_mode)
                         if last_date_time == vals[0]:
                             transport_mode = vals[1]
+                        else:
+                            continue
                 
                 activity_query = """INSERT INTO Activity (user_id, transportation_mode, start_date_time, end_date_time) VALUES ('%s', '%s', '%s', '%s')"""
 
